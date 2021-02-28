@@ -1,3 +1,1 @@
-
-
-export type Breeds
+type ImagesObj = { [key: string]: string[] };

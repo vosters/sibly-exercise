@@ -1,6 +1,5 @@
 import { useState, useRef } from 'react';
 import { hashArgs } from '../utils';
-import isEqual from 'lodash/isEqual';
 
 const CACHE: any = {};
 
@@ -20,18 +19,19 @@ export const useCache = <T>(query: Query<T>, ...args): CacheResult<T> => {
   const [error, setError] = useState(null);
 
   const fetch = () => {
-    // args is an object so deep compare to rule out false changes
-    if (isEqual(args, prevArgs.current)) {
-      return;
-    }
+    console.log('******************************');
+    console.log('FETCHING!!!!!!', ...args);
+
     // cacheID is how a cache is identified against a unique request
     const cacheID = hashArgs(...args);
 
     // look in cache and set response if present
     if (CACHE[cacheID] !== undefined) {
+      console.log('GOT FROM CACHE!!!!!!');
       setData(CACHE[cacheID]);
       setLoading(false);
     } else {
+      console.log('GOT FROM DATABASE!!!!!!');
       // else make sure loading set to true
       setLoading(true);
       // fetch new data

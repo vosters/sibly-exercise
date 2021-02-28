@@ -1,38 +1,32 @@
 import React from 'react';
 import AsyncStorage from '@react-native-community/async-storage';
 import LocalStateService from './LocalStateService';
-
-type ImagesObj = { [key: string]: string[] };
+import { ImagesObj } from '../types';
 
 class DogService {
   constructor() {
     const storageService = new LocalStateService();
   }
 
-  //   public storeDogs = (data: ) => {
-  //     storageService.set('breeds', )
-  //   }
-
-  public getImages = async (breeds: string[]): Promise<string[]> => {
+  public getImages = async (breeds: string[]): Promise<ImagesObj> => {
     const imagesObj: ImagesObj = {};
+    console.log('GONNA GET IMAGES!!!!!', breeds);
 
-    console.log('RUN BREEDS!!!!', breeds)
-    breeds.forEach(async (breed) => {
-      try {
-        const url = `https://dog.ceo/api/breed/${breed}/images`;
-        const res = await fetch(url);
-        const json = await res.json();
-        imagesObj[breed] = json;
-      } catch (err) {
-        console.log('Error getting images', err);
-      }
+    await Promise.all(
+      breeds.map(async (breed) => {
+        try {
+          const url = `https://dog.ceo/api/breed/${breed}/images`;
+          const res = await fetch(url);
+          const json = await res.json();
+          imagesObj[breed] = json.message;
+        } catch (err) {
+          console.log('Error getting images', err);
+        }
+      }),
+    );
 
-      console.log('images OBJ', imagesObj);
-
-      return imagesObj;
-    });
-
-    return;
+    console.log('GOT BREED IMAGES', Object.keys(imagesObj));
+    return imagesObj;
   };
 
   public getBreeds = async () => {

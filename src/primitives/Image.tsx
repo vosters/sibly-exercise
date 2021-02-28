@@ -1,20 +1,44 @@
 import React from 'react';
-import { ImageStyle, ImagePropTypes, StyleProp } from 'react-native';
+import {
+  ImageStyle,
+  ImagePropTypes,
+  StyleProp,
+  StyleSheet,
+} from 'react-native';
 import FastImage, { FastImageProps } from 'react-native-fast-image';
+import { deviceWidth } from '../utils/dimensions';
 
 type Props = {
-  uri: string;
-  style?: StyleProp<ImageStyle>;
+  resize?: 'contain' | 'cover';
+  center?: boolean;
 };
 
-const Image: React.FC<FastImageProps> = ({ ...props }) => {
+const Image: React.FC<Props & FastImageProps> = ({
+  resize = 'cover',
+  center,
+  style,
+  ...props
+}) => {
+  const resizeMode =
+    resize === 'cover'
+      ? FastImage.resizeMode.cover
+      : FastImage.resizeMode.contain;
   return (
     <FastImage
-      style={{ width: 100, height: 100 }}
-      resizeMode={FastImage.resizeMode.cover}
+      style={StyleSheet.flatten([styles({ center }).image, style])}
+      resizeMode={resizeMode}
       {...props}
     />
   );
 };
+
+const styles = (props: Props): any =>
+  StyleSheet.create({
+    image: {
+      width: deviceWidth / 4,
+      height: deviceWidth / 4,
+      alignSelf: props.center ? 'center' : undefined,
+    },
+  });
 
 export default Image;

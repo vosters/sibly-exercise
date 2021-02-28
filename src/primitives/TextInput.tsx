@@ -7,13 +7,13 @@ import {
 import Paragraph from './Paragraph';
 
 interface Props extends TextInputProps {
-  label: string;
+  label?: string;
 }
 
 const TextInput: React.FC<Props> = ({ label, ...props }) => {
   return (
     <>
-      <Paragraph>{label}</Paragraph>
+      {label && <Paragraph>{label}</Paragraph>}
       <RnTextInput style={styles.textInput} {...props} />
     </>
   );
@@ -22,8 +22,10 @@ const TextInput: React.FC<Props> = ({ label, ...props }) => {
 const styles = StyleSheet.create({
   textInput: {
     backgroundColor: '#efefef',
-    paddingHorizontal: 10,
-    paddingVertical: 10,
+    borderRadius: 6,
+    padding: 15,
+    marginVertical: 10,
+    fontSize: 18,
   },
 });
 

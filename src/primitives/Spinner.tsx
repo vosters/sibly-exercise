@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { ActivityIndicator, StyleProp, ViewStyle, View } from 'react-native';
 import Paragraph from './Paragraph';
+import { colors } from '../constants';
 
 interface Props {
   loading: boolean;
@@ -25,7 +26,11 @@ const Loading: React.FC<Props> = ({ loading, style, children }) => {
         style,
       ]}>
       <Paragraph>Loading doggos...</Paragraph>
-      <ActivityIndicator size="large" style={{ marginTop: 20 }} />
+      <ActivityIndicator
+        size="large"
+        color={colors.brownLightest}
+        style={{ marginTop: 20 }}
+      />
     </View>
   );
 

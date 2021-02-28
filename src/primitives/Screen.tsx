@@ -9,6 +9,13 @@ interface Props extends ViewProps, ScrollViewProps {
   loading?: boolean;
 }
 
+const styles = StyleSheet.create({
+  screen: {
+    backgroundColor: '#987554',
+    flex: 1,
+  },
+});
+
 // Unnecessary for this one-page application, but useful when there's multiple screens and need flexibility
 const Screen: React.FC<Props> = ({
   scrollEnabled,
@@ -24,7 +31,7 @@ const Screen: React.FC<Props> = ({
   );
 
   return (
-    <SafeAreaView style={{ flex: 1 }}>
+    <SafeAreaView style={styles.screen}>
       <Spinner loading={loading}>{container}</Spinner>
     </SafeAreaView>
   );
