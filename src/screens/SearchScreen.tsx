@@ -1,4 +1,5 @@
-import React, { useEffect, useState, useRef } from 'react';
+// Hooks implementation
+import React, { useEffect, useState } from 'react';
 import {
   Card,
   Error,
@@ -12,9 +13,9 @@ import {
   TextInput,
 } from '../primitives';
 import { LayoutAnimation, Platform, UIManager } from 'react-native';
-import { useFetch } from '../hooks';
+import { useFetch, useQuery } from '../hooks';
 import DogService from '../services/DogService';
-import { ImagesObj } from '../types';
+import { BreedType, ImagesObj } from '../types';
 import TrieSearch from 'trie-search';
 
 if (Platform.OS === 'android') {
@@ -24,16 +25,12 @@ if (Platform.OS === 'android') {
 }
 
 const trie = new TrieSearch();
+const service = new DogService();
 
 const SearchScreen: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selections, setSelections] = useState([]);
-  const [images, setImages] = useState<string[]>([]);
-  const [error, setError] = useState('');
   const displayAutocomplete = searchTerm.length > 0;
-  const [loadingImages, setLoadingImages] = useState(false);
-  const service = useRef(new DogService());
-  const imageCache: ImagesObj = {};
 
   // Get breeds when we land and set them to state
   const { data: breedList, error: fetchBreedsError, loading } = useFetch(
@@ -57,57 +54,25 @@ const SearchScreen: React.FC = () => {
   };
 
   // Utility functions
-  const getBreeds = () => {
+  const getBreeds = (): BreedType[] => {
     return trie.get(searchTerm);
   };
 
-  const getImages = async (): Promise<string[]> => {
-    const breeds = getBreeds();
-    let imageArr = [];
+  const {
+    fetch: fetchImages,
+    data: images,
+    loading: fetchLoading,
+    error: fetchError,
+  } = useQuery(() => service.getImages(searchTerm));
 
-    await Promise.all(
-      breeds.map(async (breed) => {
-        const key = breed._key_;
-
-        // If breed is already in cache
-        if (images[key]) {
-          setImages([...imageArr, ...imageCache[key]]);
-        } else {
-          try {
-            const url = `https://dog.ceo/api/breed/${key}/images`;
-            const res = await fetch(url);
-            const json = await res.json();
-            const value = json.message as string[];
-            imageCache[key] = value;
-            imageArr = [...imageArr, ...value];
-          } catch (err) {
-            console.log('Error getting images', err);
-            setError('Error getting images');
-          }
-        }
-      }),
-    );
-
-    return imageArr;
-  };
+  useEffect(() => {}, []);
 
   useEffect(() => {
     // Find and update the matching breeds
     setSelections(getBreeds());
 
     // Find and update the matching breeds
-    const imageGetter = async () => {
-      setLoadingImages(true);
-
-      try {
-        const imageArr = await getImages();
-        setImages(imageArr);
-      } catch (err) {
-        setError(err);
-      }
-      setLoadingImages(false);
-    };
-    imageGetter();
+    fetchImages();
   }, [searchTerm]);
 
   return (
@@ -121,8 +86,8 @@ const SearchScreen: React.FC = () => {
           onChangeText={handleSearch}
           autoFocus
         />
-        {fetchBreedsError ||
-          (error && <Error error={fetchBreedsError || error} />)}
+        {!!fetchBreedsError ||
+          (!!fetchError && <Error error={fetchBreedsError || fetchError} />)}
       </Card>
       {displayAutocomplete && (
         <>
@@ -138,7 +103,7 @@ const SearchScreen: React.FC = () => {
             ))}
           </Card>
 
-          <Loading loading={loadingImages}>
+          <Loading loading={fetchLoading}>
             <FlatList
               style={{ borderRadius: 5 }}
               data={images}

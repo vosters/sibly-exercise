@@ -14,8 +14,10 @@ class DogService {
     this.addBreeds();
   }
 
-  public getImages = async (search: string): Promise<string[]> => {
-    const breeds = this.getBreeds(search);
+  public getImages = async (
+    search: string | BreedType[],
+  ): Promise<string[]> => {
+    const breeds = typeof search === 'string' ? this.getBreeds(search) : search;
     let imageArr = [];
 
     await Promise.all(
