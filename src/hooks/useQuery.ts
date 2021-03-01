@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useCallback } from 'react';
 import { Result, Query } from '../types';
 
 export const useQuery = <T>(query: Query<T>): Result<T> => {
@@ -17,10 +17,6 @@ export const useQuery = <T>(query: Query<T>): Result<T> => {
     },
     [query],
   );
-
-  // useEffect(function fetchOnMountOrChange() {
-  //   fetch();
-  // }, []);
 
   return {
     loading,
