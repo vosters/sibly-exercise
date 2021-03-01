@@ -21,7 +21,7 @@ const Card: React.FC<ColorProps & BoxProps> = ({ color, style, ...props }) => {
   return (
     <Box
       style={StyleSheet.flatten([styles({ color }).card, style])}
-      px={4}
+      px={3}
       pt={3}
       pb={3}
       mx={2}

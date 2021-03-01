@@ -8,7 +8,7 @@ interface Props {
   style?: StyleProp<ViewStyle>;
 }
 
-const minimumLoadingTime = 1000;
+const minimumLoadingTime = 500;
 
 const Loading: React.FC<Props> = ({ loading, style, children }) => {
   const [isSimulatingLoading, setSimulatedLoading] = useState(true);

@@ -1,42 +1,63 @@
 import React from 'react';
-import AsyncStorage from '@react-native-community/async-storage';
-import LocalStateService from './LocalStateService';
-import { ImagesObj } from '../types';
+import { ImagesObj, BreedType } from '../types';
+import TrieSearch from 'trie-search';
 
 class DogService {
+  private trie: any;
+  private images: ImagesObj;
+
   constructor() {
-    const storageService = new LocalStateService();
+    this.trie = new TrieSearch();
+    this.images = {};
+
+    // Add breeds to trie on mount
+    this.addBreeds();
   }
 
-  public getImages = async (breeds: string[]): Promise<ImagesObj> => {
-    const imagesObj: ImagesObj = {};
+  public getImages = async (search: string): Promise<string[]> => {
+    const breeds = this.getBreeds(search);
+    let imageArr = [];
 
     await Promise.all(
       breeds.map(async (breed) => {
-        try {
-          const url = `https://dog.ceo/api/breed/${breed}/images`;
-          const res = await fetch(url);
-          const json = await res.json();
-          imagesObj[breed] = json.message;
-        } catch (err) {
-          console.log('Error getting images', err);
-          Promise.reject('Error getting images');
+        const key = breed._key_;
+
+        // If breed is already in cache
+        if (this.images[key]) {
+          imageArr = [...imageArr, ...this.images[key]];
+        } else {
+          // If breed isn't in cache, fetch it from database
+          try {
+            const url = `https://dog.ceo/api/breed/${key}/images`;
+            const res = await fetch(url);
+            const json = await res.json();
+            const value = json.message as string[];
+            this.images[key] = value;
+            imageArr = [...imageArr, ...value];
+          } catch (err) {
+            console.log('Error getting images', err);
+            Promise.reject('Error getting images');
+          }
         }
       }),
     );
 
-    return imagesObj;
+    return imageArr;
   };
 
-  public getBreeds = async () => {
-    const data = await fetch(`https://dog.ceo/api/breeds/list/all`)
-      .then((response) => response.json())
-      .then((json) => {
-        return json.message;
-      })
-      .catch((error) => {
-        console.error(error);
-      });
+  public addBreeds = async (): Promise<void> => {
+    try {
+      const res = await fetch(`https://dog.ceo/api/breeds/list/all`);
+      const json = await res.json();
+      const breedsObj = json.message;
+      this.trie.addFromObject(breedsObj);
+    } catch (error) {
+      Promise.reject('Error fetching dogs');
+    }
+  };
+
+  public getBreeds = (search: string): BreedType[] => {
+    return this.trie.get(search);
   };
 }
 

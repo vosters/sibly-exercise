@@ -8,13 +8,13 @@
 
 import React from 'react';
 import { StatusBar } from 'react-native';
-import { SearchScreen } from './screens';
+import { SearchScreenTrie } from './screens';
 
 const App = () => {
   return (
     <>
       <StatusBar barStyle="dark-content" />
-      <SearchScreen />
+      <SearchScreenTrie />
     </>
   );
 };
