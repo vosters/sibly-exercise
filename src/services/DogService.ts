@@ -17,6 +17,7 @@ class DogService {
   public getImages = async (
     search: string | BreedType[],
   ): Promise<string[]> => {
+    // SearchScreenTrie uses the class based trie. SearchScreen passes the selections as a parameter
     const breeds = typeof search === 'string' ? this.getBreeds(search) : search;
     let imageArr = [];
 
