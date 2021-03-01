@@ -9,6 +9,7 @@
 import React from 'react';
 import { StatusBar } from 'react-native';
 import { SearchScreen } from './screens';
+console.disableYellowBox = true;
 
 const App = () => {
   return (
