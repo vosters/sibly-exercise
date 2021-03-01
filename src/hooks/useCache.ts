@@ -1,16 +1,8 @@
 import { useState, useRef } from 'react';
 import { hashArgs } from '../utils';
+import { Query, CacheResult } from '../types';
 
 const CACHE: any = {};
-
-type Query<T> = (...args: any) => Promise<T>;
-
-interface CacheResult<T> {
-  loading: boolean;
-  data: null | T;
-  error: null | any;
-  fetch: () => void;
-}
 
 export const useCache = <T>(query: Query<T>, ...args): CacheResult<T> => {
   const prevArgs = useRef(null);
@@ -19,19 +11,14 @@ export const useCache = <T>(query: Query<T>, ...args): CacheResult<T> => {
   const [error, setError] = useState(null);
 
   const fetch = () => {
-    console.log('******************************');
-    console.log('FETCHING!!!!!!', ...args);
-
     // cacheID is how a cache is identified against a unique request
     const cacheID = hashArgs(...args);
 
     // look in cache and set response if present
     if (CACHE[cacheID] !== undefined) {
-      console.log('GOT FROM CACHE!!!!!!');
       setData(CACHE[cacheID]);
       setLoading(false);
     } else {
-      console.log('GOT FROM DATABASE!!!!!!');
       // else make sure loading set to true
       setLoading(true);
       // fetch new data

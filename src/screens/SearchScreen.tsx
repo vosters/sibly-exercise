@@ -1,32 +1,20 @@
 import React, { useEffect, useState, useRef } from 'react';
 import {
-  Box,
   Card,
+  Error,
+  FlatList,
   Headline,
   Image,
-  ImageList,
   Link,
   Logo,
-  Paragraph,
   Screen,
-  ScrollView,
-  Spinner,
+  Loading,
   TextInput,
 } from '../primitives';
 import { LayoutAnimation, Platform, UIManager } from 'react-native';
-import { useFetch, useQuery, useCache } from '../hooks';
+import { useFetch, useCache } from '../hooks';
 import DogService from '../services/DogService';
 import { ImagesObj } from '../types';
-
-// When mounted, request breeds list
-// If time, store in Async storage so request wouldn't have to happen on mount everytime. Could store an updatedAt time and only have it update if it's old than x days
-// If list was larger and I had more time, could implement a trie for faster searching
-// When the user types their first letter, loop and query everything in the breed list that starts w/ that letter to get their images
-// Cache the API request results
-// Cache the images after loading with RN-fast-image...
-// As they type more letters, filter the images down accordingly
-// When they reset to zero letters, remove all display
-// When they type first letter again, restart process, but pull from memo/cache if it's the same as before
 
 if (Platform.OS === 'android') {
   if (UIManager.setLayoutAnimationEnabledExperimental) {
@@ -40,28 +28,34 @@ const SearchScreen: React.FC = () => {
   const [selections, setSelections] = useState([]);
   const [images, setImages] = useState<undefined | ImagesObj>();
   const displayAutocomplete = searchTerm.length > 0;
-  const service = useRef(new DogService());
 
-  const toggleExpand = (str: string) => {
-    setSearchTerm(str);
-  };
+  // Get Breeds when we land and set them to state
+  const { data: breedList, error: fetchBreedsError, loading } = useFetch(
+    'https://dog.ceo/api/breeds/list/all',
+  );
 
+  // Convert breeds into array and add to state after they've loaded
+  useEffect(() => {
+    if (breedList) {
+      setBreeds(Object.keys(breedList));
+    }
+  }, [breedList]);
+
+  // Handle state when search term is updated
   const handleSearch = (str: string) => {
+    // Animate height of the card with breed names
     LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
 
     const isFirstLetter = str.length === 1;
     const addedLetter = str.length > searchTerm.length;
 
-    if (isFirstLetter && addedLetter) {
-      getImages();
-    }
-
     setSearchTerm(str);
 
+    // Don't show any dog names when input is blank
     if (str.length === 0) {
       setSelections([]);
-      setImages(undefined);
     } else {
+      // Filter from selections if they've fetched from the first letter
       const newSelections = !isFirstLetter && addedLetter ? selections : breeds;
       setSelections(
         newSelections.filter((breed) =>
@@ -69,23 +63,13 @@ const SearchScreen: React.FC = () => {
         ),
       );
     }
-
-    setSearchTerm(str);
   };
 
-  // Get Breeds when we land and set them to state
-  const { data: breedList, error: fetchBreedsError, loading } = useFetch(
-    'https://dog.ceo/api/breeds/list/all',
-  );
-
-  useEffect(() => {
-    if (breedList) {
-      setBreeds(Object.keys(breedList));
-    }
-  }, [breedList]);
-
+  // Service for getting images
+  const service = useRef(new DogService());
   const query = useRef(service.current.getImages);
 
+  // Cache image fetching for selections to speed things up
   const {
     fetch: getImages,
     data: imageFetch,
@@ -93,63 +77,19 @@ const SearchScreen: React.FC = () => {
     loading: loadingImages,
   } = useCache(service.current.getImages, selections);
 
+  // Get images when selections are updated
   useEffect(() => {
-    // if (breeds.length > 0) {
-    //   LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
-    //   setSelections(
-    //     searchTerm.length === 0
-    //       ? setSelections([])
-    //       : breeds.filter((breed) =>
-    //           breed.toLowerCase().startsWith(searchTerm.toLowerCase()),
-    //         ),
-    //   );
-    // }
-  }, [searchTerm]);
-
-  console.log('SELECTIONS', selections);
-
-  useEffect(() => {
-    // Pull all breeds when first search term is entered
-    // if (searchTerm.length === 1) {
-    //   getImages();
-    // }
-    // else if (searchTerm.length === 0) {
-    //   setImages(undefined);
-    // }
+    getImages();
   }, [selections]);
 
+  // Add images to ImageObj state once gotten from API
   useEffect(() => {
-    setImages(imageFetch);
+    setImages({ ...images, ...imageFetch });
   }, [imageFetch]);
-
-  // const renderImages = () => {
-  //   if (!images || !selections) {
-  //     return;
-  //   }
-
-  //   return selections.map((selection) =>
-  //     images[selection].map((image) => (
-  //       <Image key={image} source={{ uri: image }} />
-  //     )),
-  //   );
-  // };
-
-  // const data =
-  //   images && selections
-  //     ? selections.map((selection) =>
-  //         images[selection].map((image) => image),
-  //       )[0]
-  //     : [];
-
-  // console.log('DATA!!!!!!', data);
-  // console.log('SELECTIONS', selections);
-  // console.log('IAMGES', images);
-
-  console.log('IMAGES', images);
 
   return (
     <Screen loading={loading}>
-      <Card>
+      <Card style={{ zIndex: 1 }}>
         <Logo />
         <Headline center>Dream Dog Finder</Headline>
         <TextInput
@@ -158,41 +98,41 @@ const SearchScreen: React.FC = () => {
           onChangeText={handleSearch}
           autoFocus
         />
-        {displayAutocomplete &&
-          selections.map((selection) => (
-            <Link key={selection} onPress={() => setSearchTerm(selection)}>
-              {selection}
-            </Link>
+        {fetchBreedsError ||
+          (imageFetchError && (
+            <Error error={fetchBreedsError || imageFetchError} />
           ))}
       </Card>
       {displayAutocomplete && (
         <>
-          {/* 
-          <ImageList
-            data={selections && images ? selections : []}
-            extraData={images}
-            renderItem={({ item: selection }) => {
-              return images[selection].map((image) => (
-                <Image key={image} source={{ uri: image }} />
-              ));
-            }}
-            numColumns={4}
-          /> */}
+          <Card row wrap color="white" mt={-3} pt={5} mb={2}>
+            {selections.map((selection) => (
+              <Link
+                key={selection}
+                style={{ marginRight: 14 }}
+                bold={searchTerm === selection}
+                onPress={() => handleSearch(selection)}>
+                {selection}
+              </Link>
+            ))}
+          </Card>
 
-          <Spinner loading={loadingImages}>
-            <ScrollView>
-              <Box row style={{ flexWrap: 'wrap' }}>
-                {images &&
-                  Object.keys(images).length !== 0 &&
-                  selections.length > 0 &&
-                  selections.map((selection) =>
-                    images[selection].map((image) => (
-                      <Image key={image} source={{ uri: image }} />
-                    )),
-                  )}
-              </Box>
-            </ScrollView>
-          </Spinner>
+          <Loading loading={loadingImages}>
+            <FlatList
+              style={{ borderRadius: 5 }}
+              data={selections ? selections : []}
+              extraData={images}
+              renderItem={({ item: selection }): JSX.Element[] => {
+                return (
+                  images[selection] &&
+                  images[selection].map((image) => (
+                    <Image key={image} source={{ uri: image }} />
+                  ))
+                );
+              }}
+              numColumns={4}
+            />
+          </Loading>
         </>
       )}
     </Screen>

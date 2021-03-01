@@ -10,7 +10,6 @@ class DogService {
 
   public getImages = async (breeds: string[]): Promise<ImagesObj> => {
     const imagesObj: ImagesObj = {};
-    console.log('GONNA GET IMAGES!!!!!', breeds);
 
     await Promise.all(
       breeds.map(async (breed) => {
@@ -21,11 +20,11 @@ class DogService {
           imagesObj[breed] = json.message;
         } catch (err) {
           console.log('Error getting images', err);
+          Promise.reject('Error getting images');
         }
       }),
     );
 
-    console.log('GOT BREED IMAGES', Object.keys(imagesObj));
     return imagesObj;
   };
 

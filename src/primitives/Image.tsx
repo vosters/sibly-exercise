@@ -1,10 +1,5 @@
 import React from 'react';
-import {
-  ImageStyle,
-  ImagePropTypes,
-  StyleProp,
-  StyleSheet,
-} from 'react-native';
+import { StyleSheet } from 'react-native';
 import FastImage, { FastImageProps } from 'react-native-fast-image';
 import { deviceWidth } from '../utils/dimensions';
 

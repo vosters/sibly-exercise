@@ -1,15 +1,17 @@
 import React from 'react';
 import { StyleSheet, Text, TextProps } from 'react-native';
+import { colors } from '../constants';
 
 type Props = {
   center?: boolean;
 };
+
 const styles = (props: Props): any =>
   StyleSheet.create({
     headline: {
       fontSize: 26,
       fontWeight: '700',
-      color: '#664229',
+      color: colors.brownDarkest,
       textAlign: props.center ? 'center' : undefined,
       marginBottom: 10,
     },

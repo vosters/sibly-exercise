@@ -18,6 +18,7 @@ export type BoxProps = {
   m?: number;
   row?: boolean;
   center?: boolean;
+  wrap?: boolean;
   alignItems?: 'center' | 'flex-start' | 'flex-end';
   alignContent?: 'center' | 'flex-start' | 'flex-end';
   justifyContent?:
@@ -89,10 +90,11 @@ const styles = (props: BoxProps): any =>
         : props.justifyContent
         ? props.justifyContent
         : undefined,
+      flexWrap: props.wrap ? 'wrap' : undefined,
     },
   });
 
-const Box: React.FC<Props> = (props) => {
+const Box: React.FC<BoxProps> = (props) => {
   return (
     <View style={StyleSheet.flatten([styles(props).view, props.style])}>
       {props.children}

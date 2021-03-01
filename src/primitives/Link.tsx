@@ -1,22 +1,31 @@
 import React from 'react';
 import {
   StyleSheet,
-  Text,
   TouchableOpacity,
   TouchableOpacityProps,
 } from 'react-native';
+import Paragraph from './Paragraph';
+
+type Props = {
+  bold?: boolean;
+};
 
 const styles = StyleSheet.create({
   text: {
-    padding: 10,
-    fontSize: 20,
+    paddingVertical: 10,
   },
 });
 
-const Link: React.FC<TouchableOpacityProps> = ({ children, ...props }) => {
+const Link: React.FC<Props & TouchableOpacityProps> = ({
+  bold,
+  children,
+  ...props
+}) => {
   return (
     <TouchableOpacity {...props}>
-      <Text style={styles.text}>{children}</Text>
+      <Paragraph style={styles.text} bold={bold}>
+        {children}
+      </Paragraph>
     </TouchableOpacity>
   );
 };

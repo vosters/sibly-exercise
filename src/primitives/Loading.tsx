@@ -25,7 +25,7 @@ const Loading: React.FC<Props> = ({ loading, style, children }) => {
         },
         style,
       ]}>
-      <Paragraph>Loading doggos...</Paragraph>
+      <Paragraph color="brownLightest">Loading doggos...</Paragraph>
       <ActivityIndicator
         size="large"
         color={colors.brownLightest}
