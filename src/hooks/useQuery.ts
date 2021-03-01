@@ -1,13 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-
-type Query<T> = (...args: any) => Promise<T>;
-
-export interface Result<T> {
-  loading: boolean;
-  data: null | T;
-  error: null | any;
-  fetch: () => void;
-}
+import { Result, Query } from '../types';
 
 export const useQuery = <T>(query: Query<T>): Result<T> => {
   const [loading, setLoading] = useState(false);
@@ -26,12 +18,10 @@ export const useQuery = <T>(query: Query<T>): Result<T> => {
     [query],
   );
 
-  //   useEffect(
-  //     function fetchOnMountOrChange() {
-  //       fetch();
-  //     },
-  //     [fetch],
-  //   );
+  // useEffect(function fetchOnMountOrChange() {
+  //   fetch();
+  // }, []);
+
   return {
     loading,
     error,

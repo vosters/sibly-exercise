@@ -1,17 +1,8 @@
 import { useState, useRef } from 'react';
 import { hashArgs } from '../utils';
-import isEqual from 'lodash/isEqual';
+import { Query, CacheResult } from '../types';
 
 const CACHE: any = {};
-
-type Query<T> = (...args: any) => Promise<T>;
-
-interface CacheResult<T> {
-  loading: boolean;
-  data: null | T;
-  error: null | any;
-  fetch: () => void;
-}
 
 export const useCache = <T>(query: Query<T>, ...args): CacheResult<T> => {
   const prevArgs = useRef(null);
@@ -20,10 +11,6 @@ export const useCache = <T>(query: Query<T>, ...args): CacheResult<T> => {
   const [error, setError] = useState(null);
 
   const fetch = () => {
-    // args is an object so deep compare to rule out false changes
-    if (isEqual(args, prevArgs.current)) {
-      return;
-    }
     // cacheID is how a cache is identified against a unique request
     const cacheID = hashArgs(...args);
 
